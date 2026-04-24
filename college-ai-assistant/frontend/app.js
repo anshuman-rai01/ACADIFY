@@ -301,15 +301,23 @@ function renderHolidayCards(data, filter = null) {
 
   el.holidayCount.textContent = `Total ${filtered.length} holidays in Even Semester 2025-26`;
 }
-
+// Returns a CSS badge class based on the exam type
 function badgeClass(type) {
+
+  // Normalize input: convert to string, handle null/undefined, and make lowercase
   const t = String(type || "").toLowerCase();
+
+  // If type indicates practical or lab → assign practical badge
   if (t.includes("practical") || t.includes("lab")) {
     return "badge-practical";
   }
+
+  // If type indicates blended mode → assign blended badge
   if (t.includes("blended")) {
     return "badge-blended";
   }
+
+  // Default case → assign theory badge
   return "badge-theory";
 }
 
