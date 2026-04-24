@@ -133,31 +133,57 @@ function showTyping(show) {
   el.typingIndicator.classList.toggle("hidden", !show);
 }
 
+// Sends a user query to the backend and handles the response
 async function sendMessage(query) {
+  // Trim input and prevent empty queries or multiple simultaneous requests
   const clean = (query || "").trim();
   if (!clean || isLoading) {
     return;
   }
 
+  // Set loading state to prevent duplicate requests
   isLoading = true;
+
+  // Render user's message in chat UI
   renderMessage(clean, {}, false);
+
+  // Clear input field
   el.chatInput.value = "";
+
+  // Show typing indicator (bot is "thinking")
   showTyping(true);
 
   try {
+    // Send POST request to backend API with query and session ID
     const data = await apiPost("/chat", {
       query: query,
       session_id: SESSION_ID
     });
-    renderMessage(data.answer || "No answer found.", { type: data.type, sources: data.sources || [] }, true);
-    chatHistory.push({ query: clean, answer: data.answer, type: data.type, timestamp: data.timestamp });
+
+    // Render bot response with optional metadata (type, sources)
+    renderMessage(
+      data.answer || "No answer found.",
+      { type: data.type, sources: data.sources || [] },
+      true
+    );
+
+    // Store interaction in chat history
+    chatHistory.push({
+      query: clean,
+      answer: data.answer,
+      type: data.type,
+      timestamp: data.timestamp
+    });
+
   } catch (error) {
+    // Handle API or network errors gracefully
     renderMessage(
       `Sorry, I couldn't reach the backend service. Please ensure FastAPI is running on ${API_BASE}.\nError: ${error.message}`,
       { type: "not_found", sources: [] },
       true
     );
   } finally {
+    // Hide typing indicator and reset loading state
     showTyping(false);
     isLoading = false;
   }
