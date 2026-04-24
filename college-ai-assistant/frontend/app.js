@@ -222,16 +222,33 @@ function renderExamCards(data) {
     },
   ];
 
+  // Clear existing exam cards from the UI container
   el.examCards.innerHTML = "";
+
+  // Loop through each exam configuration and render its card
   exams.forEach((exam) => {
+
+    // Fetch corresponding data using exam key, fallback to empty object
     const details = data[exam.key] || {};
+
+    // Create a new card element for the exam
     const card = document.createElement("div");
     card.className = "exam-card";
-    const lines = exam.lines.map((fn) => `<p>${fn(details)}</p>`).join("");
+
+    // Generate HTML lines by applying formatter functions on exam details
+    const lines = exam.lines
+      .map((fn) => `<p>${fn(details)}</p>`)
+      .join("");
+
+    // Set card content with title and dynamically generated lines
     card.innerHTML = `<h3>${exam.title}</h3>${lines}`;
+
+    // Append the card to the exam cards container
     el.examCards.appendChild(card);
   });
 
+
+  // Static timeline data representing important academic events
   const timeline = [
     { date: "Jan 22", event: "Classes Start" },
     { date: "Mar 9", event: "MSE1" },
