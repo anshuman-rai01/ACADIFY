@@ -26,7 +26,7 @@ Hybrid architecture:
 - pip
 - Git
 
-## 4. Setup Steps
+## 4. Run Locally
 
 ### a) Clone the repository
 ```bash
@@ -34,43 +34,84 @@ git clone <your-repo-url>
 cd college-ai-assistant
 ```
 
-### b) Install dependencies
+### b) Create and activate a virtual environment (recommended)
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+If you are using Git Bash on Windows, this also works:
+```bash
+source .venv/Scripts/activate
+```
+
+### c) Install dependencies
 ```bash
 pip install -r backend/requirements.txt
 ```
 
-### c) Get free Groq API key
+### d) Get a Groq API key (optional, but recommended)
 - Visit https://console.groq.com
 - Create/login account
 - Generate API key
 
-### d) Configure environment
+### e) Configure environment
 Create or edit `.env` in project root:
 ```env
 GROQ_API_KEY=your_key_here
 ```
 
-### e) Place structured files
+If `.env` is missing, the app can still answer many structured JSON-based queries, but Groq-backed fallback responses will not work.
+
+### f) Confirm data files exist
 Copy your JSON files into:
 - `data/structured/`
 
-### f) Place PDF files
 Copy your PDFs into:
 - `data/pdfs/`
 
-### g) Build vector index
+### g) Build the vector index
 ```bash
 python backend/ingest.py
 ```
 
-### h) Run API server
+### h) Start the backend API
 ```bash
-uvicorn backend.main:app --reload
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-### i) Open frontend
-Open this file directly in browser:
-- `frontend/index.html`
+Backend URL:
+- `http://127.0.0.1:8000`
+- Health check: `http://127.0.0.1:8000/health`
+
+### i) Start the frontend locally
+Open a second terminal and run:
+```bash
+cd frontend
+python -m http.server 5500 --bind 127.0.0.1
+```
+
+Frontend URL:
+- `http://127.0.0.1:5500`
+
+The frontend calls the backend at `http://localhost:8000` by default, so keep the FastAPI server running on port `8000` unless you also update the frontend API base.
+
+### j) Local startup summary
+Terminal 1:
+```bash
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Terminal 2:
+```bash
+cd frontend
+python -m http.server 5500 --bind 127.0.0.1
+```
+
+Then open:
+```bash
+http://127.0.0.1:5500
+```
 
 ## 5. Folder Structure
 
@@ -113,7 +154,8 @@ college-ai-assistant/
 ## 7. Troubleshooting
 
 ### Backend not reachable from frontend
-- Ensure FastAPI is running at `http://localhost:8000`
+- Ensure FastAPI is running at `http://127.0.0.1:8000`
+- Ensure the frontend is being served from `http://127.0.0.1:5500`
 - Check terminal logs for startup errors
 
 ### GROQ key errors
@@ -128,6 +170,10 @@ college-ai-assistant/
 ### Vector store not loading
 - Run `python backend/ingest.py`
 - Ensure `vector_store/faiss_index` exists and contains `index.faiss` and `index.pkl`
+
+### Port already in use
+- If port `8000` is busy, stop the other process or run the backend on a different port
+- If you change the backend port, update the frontend API base accordingly before testing locally
 
 ### PDF extraction issues
 - Prefer selectable-text PDFs over scanned image PDFs
